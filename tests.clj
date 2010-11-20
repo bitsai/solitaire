@@ -1,0 +1,30 @@
+(ns tests
+  (:use solitaire)
+  (:use clojure.test))
+
+(def plaintext "DONOTUSEPC")
+(def keystream "KDWUPONOWT")
+(def ciphertext "OSKJJJGTMW")
+(def unkeyed-cards (vec (concat (range 1 53) [\A \B])))
+
+(deftest solitaire-tests
+  (is (= (stream-encrypt plaintext keystream)
+	 ciphertext))
+  (is (= (stream-decrypt ciphertext keystream)
+	 plaintext))
+  (is (= (->> [\A 7 2 \B 9 4 1] (move-down \A) (move-down \B) (move-down \B))
+	 [7 \A 2 9 4 \B 1]))
+  (is (= (->> [3 \A \B 8 9 6] (move-down \A) (move-down \B) (move-down \B))
+	 [3 \A 8 \B 9 6]))
+  (is (= (->> [2 4 6 \B 5 8 7 1 \A 3 9] triple-cut)
+	 [3 9 \B 5 8 7 1 \A 2 4 6]))
+  (is (= (->> [\B 5 8 7 1 \A 3 9] triple-cut)
+	 [3 9 \B 5 8 7 1 \A]))
+  (is (= (->> [\B 5 8 7 1 \A] triple-cut)
+	 [\B 5 8 7 1 \A]))
+  (is (= (->> [7 11 12 13 14 15 16 17 4 5 6 8 9] count-cut)
+	 [5 6 8 7 11 12 13 14 15 16 17 4 9]))
+  (is (= (->> unkeyed-cards count-cut)
+	 unkeyed-cards)))
+
+(run-tests 'tests)
