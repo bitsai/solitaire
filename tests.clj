@@ -1,6 +1,11 @@
 (ns tests
   (:use solitaire)
-  (:use clojure.test))
+  (:use [clojure.test :only (deftest is run-tests)]))
+
+(defn encrypts-to [plaintext ciphertext key]
+  (let [keyed-deck (key-deck deck key)]
+    (and (= (encrypt plaintext keyed-deck) ciphertext)
+	 (= (decrypt ciphertext keyed-deck) plaintext))))
 
 (deftest solitaire-tests
   (is (= (combine "DONOTUSEPC" [11 4 23 21 16 15 14 15 23 20] +)
@@ -23,15 +28,21 @@
 	 deck))
   (is (= (take 10 (make-keystream deck))
 	 [4 49 10 24 8 51 44 6 4 33]))
-  (is (= (encrypt "AAAAAAAAAA" deck)
-	 "EXKYIZSGEH"))
-  (is (= (decrypt "EXKYIZSGEH" deck)
-	 "AAAAAAAAAA"))
   (is (= (take 15 (make-keystream (key-deck deck "FOO")))
 	 [8 19 7 25 20 9 8 22 32 43 5 26 17 38 48]))
-  (is (= (encrypt "AAAAAAAAAAAAAAA" (key-deck deck "FOO"))
-	 "ITHZUJIWGRFARMW"))
-  (is (= (encrypt "SOLITAIREX" (key-deck deck "CRYPTONOMICON"))
-	 "KIRAKSFJAN")))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "EXKYIZSGEHUNTIQ" ""))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "XYIUQBMHKKJBEGY" "f"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "TUJYMBERLGXNDIW" "fo"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "ITHZUJIWGRFARMW" "foo"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "XODALGSCULIQNSC" "a"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "OHGWMXXCAIMCIQP" "aa"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "DCSQYHBQZNGDRUT" "aaa"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "XQEEMOITLZVDSQS" "b"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "QNGRKQIHCLGWSCE" "bc"))
+  (is (encrypts-to "AAAAAAAAAAAAAAA" "FMUBYBMAXHNQXCJ" "bcd"))
+  (is (encrypts-to "AAAAAAAAAAAAAAAAAAAAAAAAA"
+		   "SUGSRSXSWQRMXOHIPBFPXARYQ"
+		   "cryptonomicon"))
+  (is (encrypts-to "SOLITAIREX" "KIRAKSFJAN" "cryptonomicon")))
 
 (run-tests 'tests)

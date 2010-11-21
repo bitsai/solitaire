@@ -1,5 +1,6 @@
 (ns solitaire
-  (:use utils))
+  (:use utils)
+  (:use [clojure.string :only (upper-case)]))
 
 (defn to-number [card]
   (if (number? card)
@@ -63,13 +64,13 @@
     (map first (next solitaire-outputs))))
 
 (defn encrypt [plaintext deck]
-  (combine plaintext (make-keystream deck) +))
+  (combine (upper-case plaintext) (make-keystream deck) +))
 
 (defn decrypt [ciphertext deck]
-  (combine ciphertext (make-keystream deck) -))
+  (combine (upper-case ciphertext) (make-keystream deck) -))
 
-(defn key-deck [deck passphrase]
-  (let [offsets (map inc (to-numbers passphrase))]
+(defn key-deck [deck key]
+  (let [offsets (map inc (to-numbers (upper-case key)))]
     (reduce (fn [deck offset] (->> deck solitaire (count-cut offset)))
 	    deck
 	    offsets)))
