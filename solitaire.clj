@@ -1,20 +1,22 @@
 (ns solitaire
   (:use utils))
 
+(defn to-number [card]
+  (if (number? card)
+    card
+    53))
+
+(defn to-numbers [text]
+  (map #(- (int %) 65) text))
+
+(defn to-text [numbers]
+  (let [chars (map #(char (+ % 65)) numbers)]
+    (apply str chars)))
+
 (defn combine [text keystream f]
-  (let [to-number (fn [letter] (- (int letter) 64))
-	to-letter (fn [number] (char (+ number 64)))
-	f-mod-26 (fn [x y] (mod (f x y) 26))
-	in-nums (map to-number text)
-	ks-nums (map to-number keystream)
-	out-nums (map f-mod-26 in-nums ks-nums)]
-    (apply str (map to-letter out-nums))))
-
-(defn stream-encrypt [plaintext keystream]
-  (combine plaintext keystream +))
-
-(defn stream-decrypt [ciphertext keystream]
-  (combine ciphertext keystream -))
+  (let [in-nums (to-numbers text)
+	out-nums (map #(mod (f %1 %2) 26) in-nums keystream)]
+    (to-text out-nums)))
 
 (defn move-down [card cards]
   (if-not (= card (peek cards))
@@ -31,17 +33,32 @@
     (vec (concat bottom-cards middle-cards top-cards))))
 
 (defn count-cut [cards]
-  (let [to-number (fn [card] (if (number? card) card 53))
-	last-card (peek cards)
-	offset (to-number last-card)
-	top (subvec cards 0 offset)
-	bottom (pop (subvec cards offset))]
-    (vec (concat bottom top [last-card]))))
+  (let [bottom-card (peek cards)
+	offset (to-number bottom-card)
+	top-cards (subvec cards 0 offset)
+	middle-cards (pop (subvec cards offset))]
+    (vec (concat middle-cards top-cards [bottom-card]))))
 
-(defn solitaire [cards]
-  (->> cards
-       (move-down \A)
-       (move-down \B)
-       (move-down \B)
-       triple-cut
-       count-cut))
+(defn solitaire [[_ cards]]
+  (let [shuffled-cards (->> cards
+			    (move-down \A)
+			    (move-down \B)
+			    (move-down \B)
+			    triple-cut
+			    count-cut)
+	top-card (first shuffled-cards)
+	output-card (shuffled-cards (to-number top-card))]
+    (if (#{\A \B} output-card)
+      (recur [nil shuffled-cards])
+      [(to-number output-card) shuffled-cards])))
+
+(defn make-keystream [cards]
+  (map first (drop 1 (iterate solitaire [nil cards]))))
+
+(defn encrypt [plaintext cards]
+  (combine plaintext (make-keystream cards) +))
+
+(defn decrypt [ciphertext cards]
+  (combine ciphertext (make-keystream cards) -))
+
+(def cards (vec (concat (range 1 53) [\A \B])))
