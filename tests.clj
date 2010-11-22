@@ -1,11 +1,10 @@
 (ns tests
-  (:use solitaire)
+  (:use algorithm)
   (:use [clojure.test :only (deftest is run-tests)]))
 
 (defn encrypts-to [plaintext ciphertext key]
-  (let [keyed-deck (key-deck deck key)]
-    (and (= (encrypt plaintext keyed-deck) ciphertext)
-	 (= (decrypt ciphertext keyed-deck) plaintext))))
+  (and (= (encrypt plaintext key) ciphertext)
+       (= (decrypt ciphertext key) (pad plaintext))))
 
 (deftest solitaire-tests
   (is (= (combine "DONOTUSEPC" [11 4 23 21 16 15 14 15 23 20] +)
@@ -28,7 +27,7 @@
 	 deck))
   (is (= (take 10 (make-keystream deck))
 	 [4 49 10 24 8 51 44 6 4 33]))
-  (is (= (take 15 (make-keystream (key-deck deck "FOO")))
+  (is (= (take 15 (make-keystream (order deck "FOO")))
 	 [8 19 7 25 20 9 8 22 32 43 5 26 17 38 48]))
   (is (encrypts-to "AAAAAAAAAAAAAAA" "EXKYIZSGEHUNTIQ" ""))
   (is (encrypts-to "AAAAAAAAAAAAAAA" "XYIUQBMHKKJBEGY" "f"))
@@ -43,6 +42,6 @@
   (is (encrypts-to "AAAAAAAAAAAAAAAAAAAAAAAAA"
 		   "SUGSRSXSWQRMXOHIPBFPXARYQ"
 		   "cryptonomicon"))
-  (is (encrypts-to "SOLITAIREX" "KIRAKSFJAN" "cryptonomicon")))
+  (is (encrypts-to "SOLITAIRE" "KIRAKSFJAN" "cryptonomicon")))
 
 (run-tests 'tests)
