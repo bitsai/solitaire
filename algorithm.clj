@@ -19,10 +19,10 @@
 	out-nums (map #(mod (f %1 %2) 26) in-nums keystream)]
     (to-text out-nums)))
 
-(defn pad [text]
-  (if (zero? (mod (count text) 5))
-    text
-    (recur (apply str (concat text "X")))))
+(defn pad [chars]
+  (if (zero? (mod (count chars) 5))
+    (apply str chars)
+    (recur (concat chars "X"))))
 
 (defn move-down [card deck]
   (if (not= card (peek deck))
