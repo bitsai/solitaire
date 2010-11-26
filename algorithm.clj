@@ -1,28 +1,5 @@
 (ns algorithm
-  (:use utils)
-  (:use [clojure.string :only (upper-case)]))
-
-(defn to-number [card]
-  (if (number? card)
-    card
-    53))
-
-(defn to-numbers [text]
-  (map #(- (int %) 65) text))
-
-(defn to-text [numbers]
-  (let [chars (map #(char (+ % 65)) numbers)]
-    (apply str chars)))
-
-(defn combine [text keystream f]
-  (let [in-nums (to-numbers text)
-	out-nums (map #(mod (f %1 %2) 26) in-nums keystream)]
-    (to-text out-nums)))
-
-(defn pad [chars]
-  (if (zero? (mod (count chars) 5))
-    (apply str chars)
-    (recur (concat chars "X"))))
+  (:use utils))
 
 (defn move-down [card deck]
   (if (not= card (peek deck))
@@ -49,12 +26,7 @@
        (vec (concat middle-cards top-cards [bottom-card])))))
 
 (defn solitaire [deck]
-  (->> deck
-       (move-down \A)
-       (move-down \B)
-       (move-down \B)
-       triple-cut
-       count-cut))
+  (->> deck (move-down \A) (move-down \B) (move-down \B) triple-cut count-cut))
 
 (defn solitaire-output [[_ deck]]
   (let [shuffled-deck (solitaire deck)
@@ -64,28 +36,35 @@
       (recur [nil shuffled-deck])
       [(to-number output-card) shuffled-deck])))
 
-(defn make-keystream [deck]
+(defn to-keystream [deck]
   (let [solitaire-outputs (iterate solitaire-output [nil deck])]
     (map first (next solitaire-outputs))))
 
+(defn combine [in-text keystream f]
+  (let [padded-letters (pad (to-letters in-text))
+	in-nums (to-numbers padded-letters)
+	out-nums (map #(mod (f %1 %2) 26) in-nums keystream)
+	out-text (to-text out-nums)]
+    (group out-text)))
+
 (defmulti encrypt #(type %2))
 (defmethod encrypt clojure.lang.PersistentVector [plaintext deck]
-  (combine (upper-case (pad plaintext)) (make-keystream deck) +))
+  (combine plaintext (to-keystream deck) +))
 
 (defmulti decrypt #(type %2))
 (defmethod decrypt clojure.lang.PersistentVector [ciphertext deck]
-  (combine (upper-case ciphertext) (make-keystream deck) -))
+  (combine ciphertext (to-keystream deck) -))
 
-(defn order [deck key]
-  (let [offsets (map inc (to-numbers (upper-case key)))]
+(defn order [deck passphrase]
+  (let [offsets (map inc (to-numbers (to-letters passphrase)))]
     (reduce (fn [deck offset] (->> deck solitaire (count-cut offset)))
 	    deck
 	    offsets)))
 
 (def deck (vec (concat (range 1 53) [\A \B])))
 
-(defmethod encrypt java.lang.String [plaintext key]
-  (encrypt plaintext (order deck key)))
+(defmethod encrypt java.lang.String [plaintext passphrase]
+  (encrypt plaintext (order deck passphrase)))
 
-(defmethod decrypt java.lang.String [ciphertext key]
-  (decrypt ciphertext (order deck key)))
+(defmethod decrypt java.lang.String [ciphertext passphrase]
+  (decrypt ciphertext (order deck passphrase)))
