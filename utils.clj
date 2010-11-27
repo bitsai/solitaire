@@ -3,7 +3,7 @@
   (:use [clojure.contrib.seq :only (indexed)]))
 
 (defn group [text]
-  (let [char-groups (partition 5 5 "" text)
+  (let [char-groups (partition-all 5 text)
 	strs (map #(apply str %) char-groups)]
     (str/join " " strs)))
 
