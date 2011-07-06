@@ -1,11 +1,13 @@
 (ns utils
-  (:require [clojure.string :as str])
-  (:use [clojure.contrib.seq :only (indexed)]))
+  (:require [clojure.string :as str]))
 
 (defn group [text]
   (let [char-groups (partition-all 5 text)
 	strs (map #(apply str %) char-groups)]
     (str/join " " strs)))
+
+(defn indexed [coll]
+  (map list (range) coll))
 
 (defn index-filter [pred coll]
   (when pred 
