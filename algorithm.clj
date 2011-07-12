@@ -63,8 +63,8 @@
 
 (def deck (vec (concat (range 1 53) [\A \B])))
 
-(defmethod encrypt java.lang.String [plaintext passphrase]
+(defmethod encrypt String [plaintext passphrase]
   (encrypt plaintext (order deck passphrase)))
 
-(defmethod decrypt java.lang.String [ciphertext passphrase]
+(defmethod decrypt String [ciphertext passphrase]
   (decrypt ciphertext (order deck passphrase)))
