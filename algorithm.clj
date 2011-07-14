@@ -38,7 +38,7 @@
 
 (defn to-keystream [deck]
   (let [solitaire-outputs (iterate solitaire-output [nil deck])]
-    (map first (next solitaire-outputs))))
+    (map first (drop 1 solitaire-outputs))))
 
 (defn combine [in-text keystream f]
   (let [padded-letters (pad (to-letters in-text))
