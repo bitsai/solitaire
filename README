@@ -1,3 +1,0 @@
-Usage: clj solitaire.clj [-e|-d] <key phrase> <text>
-
-Source: http://www.schneier.com/solitaire.html
