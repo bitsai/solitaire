@@ -1,4 +1,4 @@
-[Inspiration](http://www.schneier.com/solitaire.html)
+Implements [Bruce Schneier's Solitaire encryption algorithm](http://www.schneier.com/solitaire.html).
 
 Usage:
 
